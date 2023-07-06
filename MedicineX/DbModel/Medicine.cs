@@ -12,8 +12,8 @@ namespace MedicineX.DbModel
         public decimal Price { get; set; }
         [Required]
         [Column(TypeName = "Date")]
-        public DateTime ExpTime { get; set; }
+        public DateTime ExpDate { get; set; }
         public string ImageUrl { get; set; }
-        public int Status { get; set; }
+        public int Quantity { get; set; }
     }
 }

@@ -16,6 +16,7 @@ namespace MedicineX.DbModel
         public int MedicineId { get; set; }
         public Medicine Medicine { get; set; }
         public int Quantity { get; set; }
+        public DateTime OrderTime { get; set; }
         public decimal Total { get; set; }
     }
 }

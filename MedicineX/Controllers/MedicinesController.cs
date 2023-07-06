@@ -23,23 +23,23 @@ namespace MedicineX.Controllers
 
         // GET: api/Medicines
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Medicine>>> GetMedicines()
+        public async Task<ActionResult> GetMedicines()
         {
-          if (_context.Medicines == null)
-          {
-              return NotFound();
-          }
-            return await _context.Medicines.ToListAsync();
+            if (_context.Medicines == null)
+            {
+                return NotFound();
+            }
+            return Ok(await _context.Medicines.ToListAsync());
         }
 
         // GET: api/Medicines/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Medicine>> GetMedicine(int id)
+        public async Task<ActionResult> GetMedicine(int id)
         {
-          if (_context.Medicines == null)
-          {
-              return NotFound();
-          }
+            if (_context.Medicines == null)
+            {
+                return NotFound();
+            }
             var medicine = await _context.Medicines.FindAsync(id);
 
             if (medicine == null)
@@ -47,53 +47,41 @@ namespace MedicineX.Controllers
                 return NotFound();
             }
 
-            return medicine;
+            return Ok(medicine);
+        }
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutMedicine(int id, MedicineDto medicine)
+        {
+            var exmedi = await _context.Medicines.FindAsync(id);
+            if (exmedi == null)
+            {
+                return NotFound("Id Not Exist");
+            }
+            exmedi.ExpDate = DateTime.ParseExact(medicine.ExpDate, "yyyy-MM-dd", null);
+            exmedi.Price=medicine.Price;
+            exmedi.Quantity=medicine.Quantity;
+            await _context.SaveChangesAsync();
+            return Ok("Updated Successfully");
         }
 
-        // PUT: api/Medicines/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutMedicine(int id, Medicine medicine)
-        //{
-        //    if (id != medicine.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(medicine).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!MedicineExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        // POST: api/Medicines
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Medicine>> PostMedicine(Medicine medicine)
+        public async Task<ActionResult> PostMedicine(MedicineDto medicine)
         {
-          if (_context.Medicines == null)
-          {
-              return Problem("Entity set 'DatabaseContext.Medicines'  is null.");
-          }
-            _context.Medicines.Add(medicine);
+            if (_context.Medicines == null)
+            {
+                return Problem("Entity set 'DatabaseContext.Medicines'  is null.");
+            }
+            Medicine exmedi= new Medicine();
+
+            exmedi.ExpDate = DateTime.ParseExact(medicine.ExpDate, "yyyy-MM-dd", null);
+            exmedi.Price = medicine.Price;
+            exmedi.Quantity = medicine.Quantity;
+            exmedi.Name = medicine.Name;
+            exmedi.ImageUrl = medicine.ImageUrl;
+            _context.Medicines.Add(exmedi);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetMedicine", new { id = medicine.Id }, medicine);
+            return Ok("Add Successfully");
         }
 
         // DELETE: api/Medicines/5

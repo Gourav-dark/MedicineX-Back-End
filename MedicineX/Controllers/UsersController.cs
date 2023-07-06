@@ -19,28 +19,28 @@ namespace MedicineX.Controllers
     public class UsersController : ControllerBase
     {
         private readonly DatabaseContext _context;
-        //private readonly IConfiguration _config;
+        private readonly IConfiguration _config;
 
-        public UsersController(DatabaseContext context)
+        public UsersController(DatabaseContext context,IConfiguration config)
         {
             _context = context;
-            //_config = config;
+            _config = config;
         }
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult> GetUsers()
         {
           if (_context.Users == null)
           {
               return NotFound();
           }
-            return await _context.Users.ToListAsync();
+            return Ok(await _context.Users.ToListAsync());
         }
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult> GetUser(int id)
         {
           if (_context.Users == null)
           {
@@ -53,79 +53,19 @@ namespace MedicineX.Controllers
                 return NotFound();
             }
 
-            return user;
+            return Ok(user);
         }
-
-        // PUT: api/Users/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        //[HttpPut("{id}")]
-        //public async Task<IActionResult> PutUser(int id, User user)
-        //{
-        //    if (id != user.Id)
-        //    {
-        //        return BadRequest();
-        //    }
-
-        //    _context.Entry(user).State = EntityState.Modified;
-
-        //    try
-        //    {
-        //        await _context.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!UserExists(id))
-        //        {
-        //            return NotFound();
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
-
-        //    return NoContent();
-        //}
-
-        // POST: api/Users
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult> PostUser(User user)
         {
-          if (_context.Users == null)
-          {
-              return Problem("Entity set 'DatabaseContext.Users'  is null.");
-          }
+            if (_context.Users == null)
+            {
+                return Problem("Entity set 'DatabaseContext.Users'  is null.");
+            }
             _context.Users.Add(user);
             await _context.SaveChangesAsync();
-
-            return Ok("Sucessfully");
+            return Ok("Register successfully");
         }
-
-        // DELETE: api/Users/5
-        //[HttpDelete("{id}")]
-        //public async Task<IActionResult> DeleteUser(int id)
-        //{
-        //    if (_context.Users == null)
-        //    {
-        //        return NotFound();
-        //    }
-        //    var user = await _context.Users.FindAsync(id);
-        //    if (user == null)
-        //    {
-        //        return NotFound();
-        //    }
-
-        //    _context.Users.Remove(user);
-        //    await _context.SaveChangesAsync();
-
-        //    return NoContent();
-        //}
-
-        //private bool UserExists(int id)
-        //{
-        //    return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
-        //}
         [HttpPost]
         [Route("[Action]")]
         public async Task<ActionResult> LoginUser(Login user)
@@ -135,30 +75,30 @@ namespace MedicineX.Controllers
             {
                 return NotFound("user Not Found");
             }
-            //string jwt = JwtTokenCreate(exuser.Email,exuser.Type,exuser.Id.ToString());
+            string jwt = JwtTokenCreate(exuser.Email,exuser.UserType,exuser.Id.ToString());
 
-            return Ok(exuser.Id);
+            return Ok(jwt);
         }
-        //private string JwtTokenCreate(string email, string role, string userId)
-        //{
-        //    var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"]));
-        //    var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-        //    var claims = new[]
-        //    {
-        //            new Claim("Email",email),
-        //            new Claim("Role",role),
-        //            new Claim("UserId",userId),
-        //            new Claim(ClaimTypes.Role,role),
-        //    };
-        //    var token = new JwtSecurityToken(
-        //        issuer: _config["JWT:Issuer"],
-        //        audience: _config["JWT:Audience"],
-        //        claims: claims,
-        //        expires: DateTime.Now.AddMinutes(180),
-        //        signingCredentials: credential
-        //        );
-        //    var jwt = new JwtSecurityTokenHandler().WriteToken(token);
-        //    return jwt;
-        //}
+        private string JwtTokenCreate(string email, string role, string userId)
+        {
+            var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["JWT:Key"]));
+            var credential = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+            var claims = new[]
+            {
+                    new Claim("Email",email),
+                    new Claim("Role",role),
+                    new Claim("UserId",userId),
+                    new Claim(ClaimTypes.Role,role),
+            };
+            var token = new JwtSecurityToken(
+                issuer: _config["JWT:Issuer"],
+                audience: _config["JWT:Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(180),
+                signingCredentials: credential
+                );
+            var jwt = new JwtSecurityTokenHandler().WriteToken(token);
+            return jwt;
+        }
     }
 }
